@@ -1,0 +1,60 @@
+[character]
+success_symbol = "[❯](fg:107)"
+error_symbol = "[❯](fg:88)"
+vicmd_symbol = "[❮](fg:107)"
+
+[username]
+format = "[$user]($style) "
+show_always = true
+style_user = "bold fg:30"
+
+[hostname]
+format = "[$hostname]($style) "
+ssh_only = false
+style = "bold fg:101"
+
+[directory]
+style = "bold fg:30"
+
+[git_branch]
+format = "[$symbol$branch]($style) "
+style = "bold fg:139"
+
+[git_status]
+format = "([$all_status$ahead_behind]($style) )"
+stashed = "st"
+conflicted = "cnfl"
+style = "bold fg:88"
+
+[nodejs]
+format = "[node $version]($style) "
+style = "fg:107"
+disabled = false
+
+[python]
+format = '[${symbol}${pyenv_prefix}(${version} )(\($virtualenv\) )]($style)'
+symbol = "py "
+style = "fg:142"
+
+[rust]
+symbol = "rust "
+style = "fg:210"
+
+[battery]
+charging_symbol = "ch "
+full_symbol = "ful "
+discharging_symbol = "dis "
+unknown_symbol = "hmm ... "
+empty_symbol = "ZeRo "
+
+[[battery.display]]
+threshold = 100
+style = "fg:107"
+
+[[battery.display]]
+threshold = 55
+style = "fg:186"
+
+[[battery.display]]
+threshold = 25
+style = "fg:88"
