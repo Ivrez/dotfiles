@@ -1,8 +1,8 @@
 [font]
-size = 13.0
+size = 14.0
 
 [font.normal]
-family = "Monaco"
+family = "RobotoMono Nerd Font Mono"
 style = "Regular"
 
 [colors.bright]
