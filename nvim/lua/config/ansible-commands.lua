@@ -1,40 +1,49 @@
-vim.api.nvim_create_autocmd("BufEnter", {
-  pattern = "*",
+vim.api.nvim_create_autocmd("VimEnter", {
   callback = function()
-    local vault_env = vim.fn.getcwd() .. "/vault.env"
-    if vim.fn.filereadable(vault_env) == 1 then
-      local export_command = "bash -c 'set -a; source " .. vault_env .. "; env'"
-      local output = vim.fn.system(export_command)
-      for line in output:gmatch("[^\r\n]+") do
-        local key, value = line:match("([^=]+)=(.*)")
-        if key and value then
-          vim.env[key] = value
-        end
-      end
+    local vault_env_path = vim.fn.getcwd() .. "/vault.env"
+    if vim.fn.filereadable(vault_env_path) == 0 then
+      return
     end
+
+    local cmd = {
+      "bash",
+      "-c",
+      "set -a && source " .. vim.fn.shellescape(vault_env_path) .. " && echo \"$ANSIBLE_VAULT_PASSWORD_FILE\""
+    }
+
+    local output = vim.fn.systemlist(cmd)
+
+    if vim.v.shell_error ~= 0 or #output == 0 then
+      vim.notify("Could not load ANSIBLE_VAULT_PASSWORD_FILE", vim.log.levels.WARN)
+      return
+    end
+
+    vim.env.ANSIBLE_VAULT_PASSWORD_FILE = output[1]
   end,
-  desc = "Source vault.env and export environment variables into Neovim"
+  desc = "Load ANSIBLE_VAULT_PASSWORD_FILE from vault.env"
 })
 
-vim.api.nvim_create_user_command(
-  "AnsibleVaultEncrypt",
-  function()
-    vim.cmd("write")
-    local file = vim.fn.expand("%")
-    vim.fn.system("ansible-vault encrypt " .. file)
-    vim.cmd("edit!")
-  end,
-  { desc = "Encrypt the current file with ansible-vault" }
-)
+local function vault_action(action)
+  vim.cmd("write")
+  local file = vim.fn.expand("%")
+  local cmd = "ansible-vault " .. action .. " " .. vim.fn.shellescape(file)
+  vim.fn.system(cmd)
 
-vim.api.nvim_create_user_command(
-  "AnsibleVaultDecrypt",
-  function()
-    vim.cmd("write")
-    local file = vim.fn.expand("%")
-    vim.fn.system("ansible-vault decrypt " .. file)
+  if vim.v.shell_error == 0 then
     vim.cmd("edit!")
-  end,
-  { desc = "Decrypt the current file with ansible-vault" }
-)
+  else
+    vim.notify("Vault " .. action .. " failed", vim.log.levels.ERROR)
+  end
+end
 
+vim.api.nvim_create_user_command("AnsibleVaultEncrypt",
+  function()
+    vault_action("encrypt")
+  end,
+{})
+
+vim.api.nvim_create_user_command("AnsibleVaultDecrypt",
+  function()
+    vault_action("decrypt")
+  end,
+{})
