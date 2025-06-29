@@ -42,6 +42,7 @@ return {
           width = 38,
         },
         renderer = {
+          root_folder_label = false,
           highlight_git = true,
           group_empty = true,
           icons = {
